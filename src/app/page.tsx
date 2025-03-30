@@ -15,7 +15,7 @@ export default function Home() {
     setResults([]);
 
     try {
-      const res = await fetch(`/api/dig?domain=${domain}&type=${type}`);
+      const res = await fetch(`/api/resolve?domain=${domain}&type=${type}`);
       const data = await res.json();
 
       if (data.error) {
