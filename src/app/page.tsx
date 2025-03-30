@@ -3,10 +3,16 @@
 import { useState } from 'react';
 import ResultCard from '@/components/ResultCard';
 
+type DNSResult = {
+  type: string;
+  records?: { [key: string]: any }[]; // or narrow this later
+  error?: string;
+};
+
 export default function Home() {
   const [domain, setDomain] = useState('');
   const [type, setType] = useState('A');
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<DNSResult[]>([]);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,8 +29,12 @@ export default function Home() {
       } else {
         setResults(data.results);
       }
-    } catch (err: any) {
-      setError('Something went wrong.');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Unexpected error');
+      }
     }
   };
 

@@ -4,7 +4,7 @@ import React from 'react';
 
 interface ResultCardProps {
   type: string;
-  records?: any;
+  records?: Record<string, unknown>[];
   error?: string;
 }
 
@@ -16,7 +16,7 @@ const ResultCard: React.FC<ResultCardProps> = ({ type, records, error }) => {
         {error ? (
           <li className="text-sm italic text-red-500">{error}</li>
         ) : Array.isArray(records) && records.length > 0 ? (
-          records.map((r: any, i: number) => (
+          records.map((r, i) => (
             <li key={i} className="text-sm break-words">
               {typeof r === 'string' ? r : JSON.stringify(r, null, 2)}
             </li>
