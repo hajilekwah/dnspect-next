@@ -5,7 +5,7 @@ import ResultCard from '@/components/ResultCard';
 
 type DNSResult = {
   type: string;
-  records?: { [key: string]: any }[]; // or narrow this later
+  records?: { [key: string]: unknown }[];
   error?: string;
 };
 
