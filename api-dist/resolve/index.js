@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const dohjs_1 = require("dohjs");
 const tldts_1 = require("tldts");
 const dns = new dohjs_1.DNS({
@@ -78,4 +79,4 @@ const resolve = async (context, req) => {
         };
     }
 };
-module.exports = resolve;
+exports.default = resolve;

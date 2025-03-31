@@ -89,4 +89,4 @@ const resolve: AzureFunction = async (context, req) => {
   }
 };
 
-export = resolve;
+export default resolve;
