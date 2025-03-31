@@ -16,12 +16,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build and Deploy
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # or match your Node version
+
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Provided automatically by GitHub Actions
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # for comment on PRs
           action: "upload"
-          app_location: "/src"
-          api_location: "/api"
-          output_location: ".next"
+          app_location: "/"         # root of the repo with your package.json
+          output_location: ".next"  # Next.js build output folder
           skip_deploy_on_missing_secrets: true
