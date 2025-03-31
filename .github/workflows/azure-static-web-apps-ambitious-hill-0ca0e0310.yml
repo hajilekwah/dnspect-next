@@ -24,3 +24,4 @@ jobs:
           app_location: "/src"
           api_location: "/api"
           output_location: ".next"
+          skip_deploy_on_missing_secrets: true
