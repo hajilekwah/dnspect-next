@@ -1,0 +1,30 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build and Deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1563EC31C7D442778E19BFB96691AB94 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A8B2D332555E47A5A85F77F8F70E7F54 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9003FE8593C8453486A4984AE9C4505D }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_AMBITIOUS_HILL_0CA0E0310 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/src"
+          api_location: "/api"
+          output_location: ".next"
