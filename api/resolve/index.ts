@@ -4,6 +4,14 @@ import { parse } from 'tldts';
 
 type AzureFunction = (context: Context, req: HttpRequest) => Promise<void>;
 
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection:', reason);
+});
+
 const dns = new DNS({
   baseUrl: 'https://cloudflare-dns.com/dns-query',
   method: 'POST',

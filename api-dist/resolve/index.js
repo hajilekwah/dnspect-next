@@ -2,6 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const dohjs_1 = require("dohjs");
 const tldts_1 = require("tldts");
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught exception:', err);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled rejection:', reason);
+});
 const dns = new dohjs_1.DNS({
     baseUrl: 'https://cloudflare-dns.com/dns-query',
     method: 'POST',

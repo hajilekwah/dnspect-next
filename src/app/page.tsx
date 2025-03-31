@@ -22,27 +22,21 @@ export default function Home() {
   
     try {
       const res = await fetch(`/api/resolve?domain=${domain}&type=${type}`);
-      const text = await res.text();
-      console.log('🔍 Raw response text:', text);
+      console.log('Response status:', res.status);
   
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (jsonErr) {
-        console.error('❌ Failed to parse JSON:', jsonErr);
-        setError(`Invalid JSON returned: ${text}`);
-        return;
-      }
+      const text = await res.text(); // read raw text
+      console.log('Raw response text:', text);
+  
+      const data = JSON.parse(text); // manually parse
+      console.log('Parsed data:', data);
   
       if (data.error) {
-        console.warn('⚠️ API returned error:', data.error);
         setError(data.error);
       } else {
-        console.log('✅ Parsed DNS results:', data.results);
         setResults(data.results);
       }
     } catch (err: unknown) {
-      console.error('💥 Fetch or other error:', err);
+      console.error('JSON parse or fetch error:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -51,7 +45,6 @@ export default function Home() {
     }
   };
   
-
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-900 text-black dark:text-white p-6 flex flex-col items-center">
       <h1 className="text-3xl font-bold mb-4">🔍 DNSpect</h1>
