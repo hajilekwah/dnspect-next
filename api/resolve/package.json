@@ -4,6 +4,6 @@
     "main": "index.js",
     "type": "commonjs",
     "scripts": {
-        "build:api": "tsc -p api/tsconfig.json --outDir api-dist && cp /api/resolve/function.json /api-dist/resolve/"
+        "build:api": "tsc -p api/tsconfig.json --outDir api-dist && cp api/resolve/function.json api-dist/resolve/"
     }
   }
