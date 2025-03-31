@@ -42,7 +42,7 @@ const resolve: AzureFunction = async (context, req) => {
       results: [
         {
           type,
-          records: [{ name: domainParam, data: '93.184.216.34', TTL: 3600 }]
+          records: [{ name: domainParam, data: 'example.com', TTL: 3600 }]
         }
       ]
     }
