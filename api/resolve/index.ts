@@ -26,10 +26,16 @@ function formatDnsError(code: string): string {
   }
 }
 
+function isErrorWithCode(err: unknown): err is { code: string } {
+  return typeof err === 'object' && err !== null && 'code' in err && typeof (err as any).code === 'string';
+}
+
 const resolve: AzureFunction = async (context, req) => {
   const query = req.query ?? {};
   const domainParam = query.domain;
   const type = query.type || 'A';
+
+  context.log?.('Received request:', { domain: domainParam, type });
 
   if (!domainParam) {
     context.res = {
@@ -40,6 +46,8 @@ const resolve: AzureFunction = async (context, req) => {
   }
 
   const parsed = parse(domainParam);
+  context.log?.('Parsed domain:', parsed);
+
   if (!parsed.domain || parsed.isIp) {
     context.res = {
       status: 400,
@@ -56,10 +64,12 @@ const resolve: AzureFunction = async (context, req) => {
           try {
             const result = await dns.query(domainParam, rtype);
             return { type: rtype, records: result.Answer };
-          } catch (err: any) {
+          } catch (err: unknown) {
+            const errorCode = isErrorWithCode(err) ? err.code : 'UNKNOWN';
+            context.log?.(`Error querying ${rtype}:`, err);
             return {
               type: rtype,
-              error: formatDnsError(err.code || 'UNKNOWN'),
+              error: formatDnsError(errorCode),
             };
           }
         })
@@ -79,11 +89,14 @@ const resolve: AzureFunction = async (context, req) => {
         results: [{ type, records: result.Answer }],
       },
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorCode = isErrorWithCode(err) ? err.code : 'UNKNOWN';
+    context.log?.('General error:', err);
+
     context.res = {
       status: 500,
       body: {
-        results: [{ type, error: formatDnsError(err.code || 'UNKNOWN') }],
+        results: [{ type, error: formatDnsError(errorCode) }],
       },
     };
   }

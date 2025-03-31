@@ -22,10 +22,14 @@ function formatDnsError(code) {
             return `DNS lookup error: ${code}`;
     }
 }
+function isErrorWithCode(err) {
+    return typeof err === 'object' && err !== null && 'code' in err && typeof err.code === 'string';
+}
 const resolve = async (context, req) => {
     const query = req.query ?? {};
     const domainParam = query.domain;
     const type = query.type || 'A';
+    context.log?.('Received request:', { domain: domainParam, type });
     if (!domainParam) {
         context.res = {
             status: 400,
@@ -34,6 +38,7 @@ const resolve = async (context, req) => {
         return;
     }
     const parsed = (0, tldts_1.parse)(domainParam);
+    context.log?.('Parsed domain:', parsed);
     if (!parsed.domain || parsed.isIp) {
         context.res = {
             status: 400,
@@ -50,9 +55,11 @@ const resolve = async (context, req) => {
                     return { type: rtype, records: result.Answer };
                 }
                 catch (err) {
+                    const errorCode = isErrorWithCode(err) ? err.code : 'UNKNOWN';
+                    context.log?.(`Error querying ${rtype}:`, err);
                     return {
                         type: rtype,
-                        error: formatDnsError(err.code || 'UNKNOWN'),
+                        error: formatDnsError(errorCode),
                     };
                 }
             }));
@@ -71,10 +78,12 @@ const resolve = async (context, req) => {
         };
     }
     catch (err) {
+        const errorCode = isErrorWithCode(err) ? err.code : 'UNKNOWN';
+        context.log?.('General error:', err);
         context.res = {
             status: 500,
             body: {
-                results: [{ type, error: formatDnsError(err.code || 'UNKNOWN') }],
+                results: [{ type, error: formatDnsError(errorCode) }],
             },
         };
     }
