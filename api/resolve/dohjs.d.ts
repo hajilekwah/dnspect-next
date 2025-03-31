@@ -1,1 +1,1 @@
-declare module 'dohjs';git
+declare module 'dohjs';
