@@ -31,85 +31,23 @@ function isErrorWithCode(err: unknown): err is { code: string } {
 }
 
 const resolve: AzureFunction = async (context, req) => {
-  context.log?.('--- DNSpect Azure Function Triggered ---');
+  const domainParam = req.query?.domain ?? '';
+  const type = req.query?.type ?? 'A';
 
-  const query = req.query ?? {};
-  const domainParam = query.domain;
-  const type = query.type || 'A';
+  context.log?.('Received request:', { domain: domainParam, type });
 
-  context.log?.('Received request params:', { domain: domainParam, type });
-
-  if (!domainParam) {
-    context.log?.('Missing domain in query');
-    context.res = {
-      status: 400,
-      body: { error: 'Missing domain' },
-    };
-    return;
-  }
-
-  const parsed = parse(domainParam);
-  context.log?.('Parsed domain result:', parsed);
-
-  if (!parsed.domain || parsed.isIp) {
-    context.log?.('Invalid domain format');
-    context.res = {
-      status: 400,
-      body: { error: 'Invalid domain format' },
-    };
-    return;
-  }
-
-  try {
-    if (type === 'ALL') {
-      const recordTypes = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CAA', 'SOA'];
-      const all = await Promise.all(
-        recordTypes.map(async (rtype) => {
-          try {
-            const result = await dns.query(domainParam, rtype);
-            context.log?.(`Resolved ${rtype} for ${domainParam}`);
-            return { type: rtype, records: result.Answer };
-          } catch (err: unknown) {
-            const errorCode = isErrorWithCode(err) ? err.code : 'UNKNOWN';
-            context.log?.(`Error querying ${rtype}:`, err);
-            return {
-              type: rtype,
-              error: formatDnsError(errorCode),
-            };
-          }
-        })
-      );
-
-      context.res = {
-        status: 200,
-        body: { results: all },
-      };
-      context.log?.('Returning ALL results');
-      return;
+  context.res = {
+    status: 200,
+    body: {
+      results: [
+        {
+          type,
+          records: [{ name: domainParam, data: '93.184.216.34', TTL: 3600 }]
+        }
+      ]
     }
-
-    const result = await dns.query(domainParam, type);
-    context.log?.(`Resolved ${type} for ${domainParam}:`, result.Answer);
-
-    context.res = {
-      status: 200,
-      body: {
-        results: [{ type, records: result.Answer }],
-      },
-    };
-  } catch (err: unknown) {
-    const errorCode = isErrorWithCode(err) ? err.code : 'UNKNOWN';
-    context.log?.('General DNS query error:', err);
-
-    context.res = {
-      status: 500,
-      body: {
-        results: [{ type, error: formatDnsError(errorCode) }],
-      },
-    };
-  }
-
-  context.log?.('--- DNSpect Azure Function Complete ---');
+  };
 };
+
 
 export default resolve;
