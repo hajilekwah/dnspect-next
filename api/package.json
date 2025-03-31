@@ -2,5 +2,8 @@
     "name": "dnspect-function",
     "version": "1.0.0",
     "main": "index.js",
-    "type": "commonjs"
+    "type": "commonjs",
+    "scripts": {
+      "build:api": "tsc -p api/tsconfig.json --outDir api-dist"
+    }
   }
