@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:api": "tsc -p api/tsconfig.json"
   },
   "dependencies": {
     "dohjs": "^0.3.3",
