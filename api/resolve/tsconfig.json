@@ -1,4 +1,3 @@
-// api/tsconfig.json
 {
     "compilerOptions": {
       "target": "ES2020",
@@ -6,7 +5,8 @@
       "rootDir": "./",
       "outDir": "../api-dist",
       "strict": true,
-      "esModuleInterop": true
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true
     },
     "exclude": ["node_modules"]
   }
