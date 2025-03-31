@@ -23,6 +23,7 @@ jobs:
       - name: Build and Deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_CALM_MUD_0F437EF10 }}
           action: "upload"
           app_location: "/"
           output_location: ".next"
