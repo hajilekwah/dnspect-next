@@ -2,12 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const dohjs_1 = require("dohjs");
 const tldts_1 = require("tldts");
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught exception:', err);
-});
-process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled rejection:', reason);
-});
 const dns = new dohjs_1.DNS({
     baseUrl: 'https://cloudflare-dns.com/dns-query',
     method: 'POST',
@@ -32,11 +26,13 @@ function isErrorWithCode(err) {
     return typeof err === 'object' && err !== null && 'code' in err && typeof err.code === 'string';
 }
 const resolve = async (context, req) => {
+    context.log?.('--- DNSpect Azure Function Triggered ---');
     const query = req.query ?? {};
     const domainParam = query.domain;
     const type = query.type || 'A';
-    context.log?.('Received request:', { domain: domainParam, type });
+    context.log?.('Received request params:', { domain: domainParam, type });
     if (!domainParam) {
+        context.log?.('Missing domain in query');
         context.res = {
             status: 400,
             body: { error: 'Missing domain' },
@@ -44,8 +40,9 @@ const resolve = async (context, req) => {
         return;
     }
     const parsed = (0, tldts_1.parse)(domainParam);
-    context.log?.('Parsed domain:', parsed);
+    context.log?.('Parsed domain result:', parsed);
     if (!parsed.domain || parsed.isIp) {
+        context.log?.('Invalid domain format');
         context.res = {
             status: 400,
             body: { error: 'Invalid domain format' },
@@ -58,6 +55,7 @@ const resolve = async (context, req) => {
             const all = await Promise.all(recordTypes.map(async (rtype) => {
                 try {
                     const result = await dns.query(domainParam, rtype);
+                    context.log?.(`Resolved ${rtype} for ${domainParam}`);
                     return { type: rtype, records: result.Answer };
                 }
                 catch (err) {
@@ -73,9 +71,11 @@ const resolve = async (context, req) => {
                 status: 200,
                 body: { results: all },
             };
+            context.log?.('Returning ALL results');
             return;
         }
         const result = await dns.query(domainParam, type);
+        context.log?.(`Resolved ${type} for ${domainParam}:`, result.Answer);
         context.res = {
             status: 200,
             body: {
@@ -85,7 +85,7 @@ const resolve = async (context, req) => {
     }
     catch (err) {
         const errorCode = isErrorWithCode(err) ? err.code : 'UNKNOWN';
-        context.log?.('General error:', err);
+        context.log?.('General DNS query error:', err);
         context.res = {
             status: 500,
             body: {
@@ -93,5 +93,6 @@ const resolve = async (context, req) => {
             },
         };
     }
+    context.log?.('--- DNSpect Azure Function Complete ---');
 };
 exports.default = resolve;
