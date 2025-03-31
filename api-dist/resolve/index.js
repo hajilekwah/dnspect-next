@@ -1,5 +1,4 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const dohjs_1 = require("dohjs");
 const tldts_1 = require("tldts");
 const dns = new dohjs_1.DNS({
@@ -22,7 +21,7 @@ function formatDnsError(code) {
             return `DNS lookup error: ${code}`;
     }
 }
-const lookup = async (context, req) => {
+const resolve = async (context, req) => {
     const query = req.query ?? {};
     const domainParam = query.domain;
     const type = query.type || 'A';
@@ -79,4 +78,4 @@ const lookup = async (context, req) => {
         };
     }
 };
-exports.default = lookup;
+module.exports = resolve;
