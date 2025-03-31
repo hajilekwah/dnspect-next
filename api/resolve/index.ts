@@ -26,7 +26,7 @@ function formatDnsError(code: string): string {
   }
 }
 
-const lookup: AzureFunction = async (context, req) => {
+const resolve: AzureFunction = async (context, req) => {
   const query = req.query ?? {};
   const domainParam = query.domain;
   const type = query.type || 'A';
@@ -89,4 +89,4 @@ const lookup: AzureFunction = async (context, req) => {
   }
 };
 
-export default lookup;
+export = resolve;
