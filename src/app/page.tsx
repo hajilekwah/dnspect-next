@@ -19,17 +19,30 @@ export default function Home() {
     e.preventDefault();
     setError('');
     setResults([]);
-
+  
     try {
       const res = await fetch(`/api/resolve?domain=${domain}&type=${type}`);
-      const data = await res.json();
-
+      const text = await res.text();
+      console.log('🔍 Raw response text:', text);
+  
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (jsonErr) {
+        console.error('❌ Failed to parse JSON:', jsonErr);
+        setError(`Invalid JSON returned: ${text}`);
+        return;
+      }
+  
       if (data.error) {
+        console.warn('⚠️ API returned error:', data.error);
         setError(data.error);
       } else {
+        console.log('✅ Parsed DNS results:', data.results);
         setResults(data.results);
       }
     } catch (err: unknown) {
+      console.error('💥 Fetch or other error:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -37,6 +50,7 @@ export default function Home() {
       }
     }
   };
+  
 
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-900 text-black dark:text-white p-6 flex flex-col items-center">
