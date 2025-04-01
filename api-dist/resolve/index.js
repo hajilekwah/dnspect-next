@@ -40,10 +40,11 @@ const resolve = async (context, req) => {
         };
     }
     catch (err) {
-        context.log?.('Unexpected error:', err);
+        const message = err instanceof Error ? err.message : String(err);
+        context.log?.('Unexpected error occurred:', message);
         context.res = {
             status: 500,
-            body: { error: 'Unexpected error occurred while querying DNS' },
+            body: { error: `Unexpected error occurred while querying DNS: ${message}` },
         };
     }
 };
