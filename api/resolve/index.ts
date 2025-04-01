@@ -1,5 +1,5 @@
 import { Context, HttpRequest } from 'azure-functions-ts-essentials';
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // CommonJS compatible
 
 type AzureFunction = (context: Context, req: HttpRequest) => Promise<void>;
 
@@ -62,4 +62,4 @@ const resolve: AzureFunction = async (context, req) => {
   }
 };
 
-export = resolve;
+export default resolve;
