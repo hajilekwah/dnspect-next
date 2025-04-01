@@ -1,5 +1,5 @@
 import { Context, HttpRequest } from 'azure-functions-ts-essentials';
-
+//
 type AzureFunction = (context: Context, req: HttpRequest) => Promise<void>;
 
 const resolve: AzureFunction = async (context, req) => {
