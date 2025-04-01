@@ -1,9 +1,8 @@
 "use strict";
-const fetch = require('node-fetch');
+Object.defineProperty(exports, "__esModule", { value: true });
 const resolve = async (context, req) => {
     const domain = req.query?.domain;
     const type = req.query?.type || 'A';
-    context.log?.('DNS request received', { domain, type });
     if (!domain) {
         context.res = {
             status: 400,
@@ -12,15 +11,13 @@ const resolve = async (context, req) => {
         return;
     }
     try {
-        const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`;
-        context.log?.('Querying Cloudflare DoH endpoint:', url);
-        const response = await fetch(url, {
+        const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`, {
             headers: {
-                Accept: 'application/dns-json',
+                'Accept': 'application/dns-json',
             },
         });
         if (!response.ok) {
-            context.log?.(`Cloudflare DoH query failed: ${response.status} ${response.statusText}`);
+            context.log?.(`Cloudflare DoH query failed: ${response.statusText}`);
             context.res = {
                 status: 502,
                 body: { error: 'Upstream DNS query failed' },
@@ -28,7 +25,6 @@ const resolve = async (context, req) => {
             return;
         }
         const data = await response.json();
-        context.log?.('DNS response:', data);
         context.res = {
             status: 200,
             body: {
@@ -52,4 +48,4 @@ const resolve = async (context, req) => {
         };
     }
 };
-module.exports = resolve;
+exports.default = resolve;

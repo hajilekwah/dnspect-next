@@ -1,13 +1,10 @@
 import { Context, HttpRequest } from 'azure-functions-ts-essentials';
-const fetch = require('node-fetch'); // CommonJS compatible
 
 type AzureFunction = (context: Context, req: HttpRequest) => Promise<void>;
 
 const resolve: AzureFunction = async (context, req) => {
   const domain = req.query?.domain;
   const type = req.query?.type || 'A';
-
-  context.log?.('DNS request received', { domain, type });
 
   if (!domain) {
     context.res = {
@@ -18,17 +15,17 @@ const resolve: AzureFunction = async (context, req) => {
   }
 
   try {
-    const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`;
-    context.log?.('Querying Cloudflare DoH endpoint:', url);
-
-    const response = await fetch(url, {
-      headers: {
-        Accept: 'application/dns-json',
-      },
-    });
+    const response = await fetch(
+      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`,
+      {
+        headers: {
+          'Accept': 'application/dns-json',
+        },
+      }
+    );
 
     if (!response.ok) {
-      context.log?.(`Cloudflare DoH query failed: ${response.status} ${response.statusText}`);
+      context.log?.(`Cloudflare DoH query failed: ${response.statusText}`);
       context.res = {
         status: 502,
         body: { error: 'Upstream DNS query failed' },
@@ -37,7 +34,6 @@ const resolve: AzureFunction = async (context, req) => {
     }
 
     const data = await response.json();
-    context.log?.('DNS response:', data);
 
     context.res = {
       status: 200,

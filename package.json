@@ -9,10 +9,12 @@
     "lint": "next lint",
     "build:api": "tsc -p api/tsconfig.json"
   },
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "dohjs": "^0.3.3",
     "next": "15.2.3",
-    "node-fetch": "^3.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tldts": "^6.1.85"
