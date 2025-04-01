@@ -57,5 +57,5 @@ const resolve: AzureFunction = async (context, req) => {
     };
   }
 };
-// i am about to give up
+// help
 export default resolve;
