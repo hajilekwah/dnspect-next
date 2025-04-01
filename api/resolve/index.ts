@@ -1,53 +1,60 @@
 import { Context, HttpRequest } from 'azure-functions-ts-essentials';
-import { DNS } from 'dohjs';
-import { parse } from 'tldts';
 
 type AzureFunction = (context: Context, req: HttpRequest) => Promise<void>;
 
-const dns = new DNS({
-  baseUrl: 'https://cloudflare-dns.com/dns-query',
-  method: 'POST',
-});
-
-function formatDnsError(code: string): string {
-  switch (code) {
-    case 'ENODATA':
-      return 'No DNS records found for this type.';
-    case 'ENOTFOUND':
-      return 'Domain not found.';
-    case 'ETIMEOUT':
-      return 'DNS query timed out.';
-    case 'SERVFAIL':
-      return 'DNS server failed to complete the request.';
-    case 'REFUSED':
-      return 'DNS query was refused by the server.';
-    default:
-      return `DNS lookup error: ${code}`;
-  }
-}
-
-function isErrorWithCode(err: unknown): err is { code: string } {
-  return typeof err === 'object' && err !== null && 'code' in err && typeof (err as any).code === 'string';
-}
-
 const resolve: AzureFunction = async (context, req) => {
-  const domainParam = req.query?.domain ?? '';
-  const type = req.query?.type ?? 'A';
+  const domain = req.query?.domain;
+  const type = req.query?.type || 'A';
 
-  context.log?.('Received request:', { domain: domainParam, type });
+  if (!domain) {
+    context.res = {
+      status: 400,
+      body: { error: 'Missing domain parameter' },
+    };
+    return;
+  }
 
-  context.res = {
-    status: 200,
-    body: {
-      results: [
-        {
-          type,
-          records: [{ name: domainParam, data: 'example.com', TTL: 3600 }]
-        }
-      ]
+  try {
+    const response = await fetch(
+      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`,
+      {
+        headers: {
+          'Accept': 'application/dns-json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      context.log?.(`Cloudflare DoH query failed: ${response.statusText}`);
+      context.res = {
+        status: 502,
+        body: { error: 'Upstream DNS query failed' },
+      };
+      return;
     }
-  };
-};
 
+    const data = await response.json();
+
+    context.res = {
+      status: 200,
+      body: {
+        results: [
+          {
+            type,
+            records: data.Answer ?? [],
+            question: data.Question ?? [],
+            status: data.Status,
+          },
+        ],
+      },
+    };
+  } catch (err) {
+    context.log?.('Unexpected error:', err);
+    context.res = {
+      status: 500,
+      body: { error: 'Unexpected error occurred while querying DNS' },
+    };
+  }
+};
 
 export default resolve;
